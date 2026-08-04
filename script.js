@@ -741,3 +741,607 @@ now.toLocaleTimeString(
 updateClock();
 
 setInterval(updateClock,1000);
+
+/* =====================================================
+   NETFLIX HORIZONTAL SLIDER
+===================================================== */
+
+const movieRows =
+document.querySelectorAll(".movie-row");
+
+movieRows.forEach((row)=>{
+
+let isDown = false;
+
+let startX;
+
+let scrollLeft;
+
+row.addEventListener("mousedown",(e)=>{
+
+isDown = true;
+
+row.classList.add("dragging");
+
+startX =
+e.pageX-row.offsetLeft;
+
+scrollLeft =
+row.scrollLeft;
+
+});
+
+row.addEventListener("mouseleave",()=>{
+
+isDown = false;
+
+row.classList.remove("dragging");
+
+});
+
+row.addEventListener("mouseup",()=>{
+
+isDown = false;
+
+row.classList.remove("dragging");
+
+});
+
+row.addEventListener("mousemove",(e)=>{
+
+if(!isDown) return;
+
+e.preventDefault();
+
+const x =
+e.pageX-row.offsetLeft;
+
+const walk =
+(x-startX)*2;
+
+row.scrollLeft =
+scrollLeft-walk;
+
+});
+
+});
+
+/* =====================================================
+   TOUCH SUPPORT
+===================================================== */
+
+movieRows.forEach((row)=>{
+
+let startTouch = 0;
+
+let startScroll = 0;
+
+row.addEventListener("touchstart",(e)=>{
+
+startTouch =
+e.touches[0].clientX;
+
+startScroll =
+row.scrollLeft;
+
+});
+
+row.addEventListener("touchmove",(e)=>{
+
+const current =
+e.touches[0].clientX;
+
+const move =
+(current-startTouch)*2;
+
+row.scrollLeft =
+startScroll-move;
+
+});
+
+});
+
+/* =====================================================
+   MOUSE WHEEL
+===================================================== */
+
+movieRows.forEach((row)=>{
+
+row.addEventListener("wheel",(e)=>{
+
+e.preventDefault();
+
+row.scrollLeft += e.deltaY;
+
+});
+
+});
+
+/* =====================================================
+   MOVIE CARD HOVER
+===================================================== */
+
+const movieCards =
+document.querySelectorAll(".movie-card");
+
+movieCards.forEach((card)=>{
+
+card.addEventListener("mouseenter",()=>{
+
+card.style.zIndex="99";
+
+});
+
+card.addEventListener("mouseleave",()=>{
+
+card.style.zIndex="1";
+
+});
+
+});
+
+/* =====================================================
+   CARD CLICK EFFECT
+===================================================== */
+
+movieCards.forEach((card)=>{
+
+card.addEventListener("click",()=>{
+
+card.animate(
+
+[
+
+{
+
+transform:
+"scale(1)"
+
+},
+
+{
+
+transform:
+"scale(.95)"
+
+},
+
+{
+
+transform:
+"scale(1)"
+
+}
+
+],
+
+{
+
+duration:300
+
+}
+
+);
+
+});
+
+});
+
+/* =====================================================
+   FEATURED BUTTON
+===================================================== */
+
+const watchBtn =
+document.querySelector(".watch-btn");
+
+if(watchBtn){
+
+watchBtn.addEventListener("click",()=>{
+
+startMusic();
+
+watchBtn.innerHTML=
+
+'<i class="fa-solid fa-circle-check"></i> Playing';
+
+setTimeout(()=>{
+
+watchBtn.innerHTML=
+
+'<i class="fa-solid fa-play"></i> Watch Now';
+
+},2500);
+
+});
+
+}
+
+/* =====================================================
+   RANDOM BADGE
+===================================================== */
+
+const badges=[
+
+"TOP 10",
+
+"NEW",
+
+"TRENDING",
+
+"POPULAR",
+
+"NETFLIX",
+
+"❤️ FOR YOU"
+
+];
+
+movieCards.forEach((card)=>{
+
+const badge=
+
+document.createElement("span");
+
+badge.className="top-badge";
+
+badge.textContent=
+
+badges[
+Math.floor(
+Math.random()*badges.length
+)
+];
+
+card.appendChild(badge);
+
+});
+
+/* =====================================================
+   RANDOM QUALITY
+===================================================== */
+
+const qualities=[
+
+"HD",
+
+"FULL HD",
+
+"4K",
+
+"HDR",
+
+"DOLBY"
+
+];
+
+movieCards.forEach((card)=>{
+
+const quality=
+
+document.createElement("span");
+
+quality.className="quality";
+
+quality.textContent=
+
+qualities[
+Math.floor(
+Math.random()*qualities.length
+)
+];
+
+card.appendChild(quality);
+
+});
+
+/* =====================================================
+   CONTINUE WATCHING EFFECT
+===================================================== */
+
+movieCards.forEach((card)=>{
+
+const progress=
+
+document.createElement("div");
+
+progress.style.position="absolute";
+
+progress.style.left="0";
+
+progress.style.bottom="0";
+
+progress.style.height="4px";
+
+progress.style.width=
+
+(Math.random()*100)+"%";
+
+progress.style.background="#E50914";
+
+progress.style.zIndex="5";
+
+card.appendChild(progress);
+
+});
+
+/* =====================================================
+   AUTO SCROLL MOVIE ROW
+===================================================== */
+
+const rows = document.querySelectorAll(".movie-row");
+
+rows.forEach((row) => {
+
+    let autoScroll = setInterval(() => {
+
+        row.scrollLeft += 1.2;
+
+        if (
+            row.scrollLeft >=
+            row.scrollWidth - row.clientWidth
+        ) {
+
+            row.scrollLeft = 0;
+
+        }
+
+    }, 20);
+
+    row.addEventListener("mouseenter", () => {
+
+        clearInterval(autoScroll);
+
+    });
+
+    row.addEventListener("mouseleave", () => {
+
+        autoScroll = setInterval(() => {
+
+            row.scrollLeft += 1.2;
+
+            if (
+                row.scrollLeft >=
+                row.scrollWidth - row.clientWidth
+            ) {
+
+                row.scrollLeft = 0;
+
+            }
+
+        }, 20);
+
+    });
+
+});
+
+/* =====================================================
+   FLOATING PARTICLES
+===================================================== */
+
+const particleContainer = document.createElement("div");
+
+particleContainer.style.position = "fixed";
+particleContainer.style.left = "0";
+particleContainer.style.top = "0";
+particleContainer.style.width = "100%";
+particleContainer.style.height = "100%";
+particleContainer.style.pointerEvents = "none";
+particleContainer.style.zIndex = "-1";
+
+document.body.appendChild(particleContainer);
+
+function createParticle() {
+
+    const particle = document.createElement("span");
+
+    particle.style.position = "absolute";
+    particle.style.width = "4px";
+    particle.style.height = "4px";
+    particle.style.borderRadius = "50%";
+    particle.style.background = "rgba(229,9,20,.7)";
+
+    particle.style.left =
+        Math.random() * window.innerWidth + "px";
+
+    particle.style.top =
+        window.innerHeight + "px";
+
+    particle.style.opacity = Math.random();
+
+    particleContainer.appendChild(particle);
+
+    const duration = 5000 + Math.random() * 3000;
+
+    particle.animate(
+
+        [
+
+            {
+                transform: "translateY(0)",
+                opacity: 1
+            },
+
+            {
+                transform: `translateY(-${window.innerHeight + 150}px)`,
+                opacity: 0
+            }
+
+        ],
+
+        {
+
+            duration: duration,
+            easing: "linear"
+
+        }
+
+    );
+
+    setTimeout(() => {
+
+        particle.remove();
+
+    }, duration);
+
+}
+
+setInterval(createParticle, 250);
+
+/* =====================================================
+   HERO PARALLAX SCALE
+===================================================== */
+
+window.addEventListener("scroll", () => {
+
+    const value = window.scrollY * 0.0004;
+
+    hero.style.transform =
+        `scale(${1 + value})`;
+
+});
+
+/* =====================================================
+   KEYBOARD SHORTCUT
+===================================================== */
+
+document.addEventListener("keydown", (e) => {
+
+    if (e.key === "ArrowRight") {
+
+        rows.forEach((row) => {
+
+            row.scrollLeft += 350;
+
+        });
+
+    }
+
+    if (e.key === "ArrowLeft") {
+
+        rows.forEach((row) => {
+
+            row.scrollLeft -= 350;
+
+        });
+
+    }
+
+});
+
+/* =====================================================
+   BACK TO TOP BUTTON
+===================================================== */
+
+const topButton = document.createElement("button");
+
+topButton.innerHTML =
+'<i class="fa-solid fa-arrow-up"></i>';
+
+topButton.id = "backTop";
+
+document.body.appendChild(topButton);
+
+topButton.style.position = "fixed";
+topButton.style.right = "25px";
+topButton.style.bottom = "25px";
+topButton.style.width = "55px";
+topButton.style.height = "55px";
+topButton.style.borderRadius = "50%";
+topButton.style.border = "none";
+topButton.style.background = "#E50914";
+topButton.style.color = "#fff";
+topButton.style.fontSize = "18px";
+topButton.style.cursor = "pointer";
+topButton.style.display = "none";
+topButton.style.zIndex = "999";
+
+window.addEventListener("scroll", () => {
+
+    if (window.scrollY > 500) {
+
+        topButton.style.display = "block";
+
+    } else {
+
+        topButton.style.display = "none";
+
+    }
+
+});
+
+topButton.addEventListener("click", () => {
+
+    window.scrollTo({
+
+        top: 0,
+        behavior: "smooth"
+
+    });
+
+});
+
+/* =====================================================
+   RANDOM NETFLIX QUOTES
+===================================================== */
+
+const quotes = [
+
+    "Continue Watching ❤️",
+
+    "Our Love Never Ends.",
+
+    "Best Romance Ever.",
+
+    "Only On Netflix Premium.",
+
+    "Episode Baru Setiap Hari."
+
+];
+
+setInterval(() => {
+
+    const random =
+        quotes[
+            Math.floor(Math.random() * quotes.length)
+        ];
+
+    const ending =
+        document.querySelector(".ending p");
+
+    if (ending) {
+
+        ending.textContent = random;
+
+    }
+
+}, 4000);
+
+/* =====================================================
+   PAGE VISIBILITY
+===================================================== */
+
+document.addEventListener("visibilitychange", () => {
+
+    if (document.hidden) {
+
+        document.title = "Come Back ❤️";
+
+    } else {
+
+        document.title = "Netflix Premium ❤️";
+
+    }
+
+});
+
+/* =====================================================
+   FINAL INITIALIZATION
+===================================================== */
+
+console.log("====================================");
+
+console.log("Netflix Premium Romantic Edition");
+
+console.log("Website Loaded Successfully ❤️");
+
+console.log("====================================");
