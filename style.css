@@ -1595,7 +1595,8 @@ section{
 
     content:"";
 
-    position:absolute;
+    position:relative;
+    overflow:hidden;   
 
     width:220px;
     height:220px;
