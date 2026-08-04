@@ -669,6 +669,16 @@ section{
 
     scroll-behavior:smooth;
 
+    cursor:grab;
+
+}
+
+.movie-row.dragging{
+
+    cursor:grabbing;
+
+    user-select:none;
+
 }
 
 .movie-row::-webkit-scrollbar{
