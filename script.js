@@ -1072,20 +1072,29 @@ const rows = document.querySelectorAll(".movie-row");
 
 rows.forEach((row) => {
 
-    let autoScroll = setInterval(() => {
+    let isDragging = false;
 
-        row.scrollLeft += 1.2;
+row.addEventListener("mousedown", () => {
+    isDragging = true;
+});
 
-        if (
-            row.scrollLeft >=
-            row.scrollWidth - row.clientWidth
-        ) {
+row.addEventListener("mouseup", () => {
+    isDragging = false;
+});
 
-            row.scrollLeft = 0;
+setInterval(() => {
 
-        }
+    if (isDragging) return;
 
-    }, 20);
+    row.scrollLeft += 1.2;
+
+    if (row.scrollLeft >= row.scrollWidth - row.clientWidth) {
+
+        row.scrollLeft = 0;
+
+    }
+
+}, 20);
 
     row.addEventListener("mouseenter", () => {
 
