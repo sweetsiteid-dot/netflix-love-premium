@@ -743,148 +743,257 @@ updateClock();
 setInterval(updateClock,1000);
 
 /* =====================================================
-   NETFLIX HORIZONTAL SLIDER
+   NETFLIX SLIDER V2
 ===================================================== */
 
-const movieRows =
-document.querySelectorAll(".movie-row");
+const rows = document.querySelectorAll(".movie-row");
 
-movieRows.forEach((row)=>{
+rows.forEach((row) => {
 
-let isDown = false;
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
 
-let startX;
+    let autoSlide;
+    let resumeTimeout;
 
-let scrollLeft;
+    /* ==========================
+       AUTO SLIDE
+    ========================== */
 
-row.addEventListener("mousedown",(e)=>{
+    function startAutoSlide(){
 
-isDown = true;
+        stopAutoSlide();
 
-row.classList.add("dragging");
+        autoSlide = setInterval(()=>{
 
-startX =
-e.pageX-row.offsetLeft;
+            row.scrollBy({
 
-scrollLeft =
-row.scrollLeft;
+                left:1,
+                behavior:"auto"
 
-});
+            });
 
-row.addEventListener("mouseleave",()=>{
+            if(
+                row.scrollLeft >=
+                row.scrollWidth-row.clientWidth
+            ){
 
-isDown = false;
+                row.scrollTo({
 
-row.classList.remove("dragging");
+                    left:0,
+                    behavior:"smooth"
 
-});
+                });
 
-row.addEventListener("mouseup",()=>{
+            }
 
-isDown = false;
+        },18);
 
-row.classList.remove("dragging");
+    }
 
-});
+    function stopAutoSlide(){
 
-row.addEventListener("mousemove",(e)=>{
+        clearInterval(autoSlide);
 
-if(!isDown) return;
+    }
 
-e.preventDefault();
+    function resumeLater(){
 
-const x =
-e.pageX-row.offsetLeft;
+        clearTimeout(resumeTimeout);
 
-const walk =
-(x-startX)*2;
+        resumeTimeout=setTimeout(()=>{
 
-row.scrollLeft =
-scrollLeft-walk;
+            startAutoSlide();
 
-});
+        },4000);
+
+    }
+
+    startAutoSlide();
+
+    /* ==========================
+       DRAG MOUSE
+    ========================== */
+
+    row.addEventListener("mousedown",(e)=>{
+
+        isDown=true;
+
+        startX=e.pageX-row.offsetLeft;
+
+        scrollLeft=row.scrollLeft;
+
+        row.classList.add("dragging");
+
+        stopAutoSlide();
+
+    });
+
+    window.addEventListener("mouseup",()=>{
+
+        isDown=false;
+
+        row.classList.remove("dragging");
+
+        resumeLater();
+
+    });
+
+    row.addEventListener("mousemove",(e)=>{
+
+        if(!isDown) return;
+
+        e.preventDefault();
+
+        const x=e.pageX-row.offsetLeft;
+
+        const walk=(x-startX)*2;
+
+        row.scrollLeft=scrollLeft-walk;
+
+    });
+
+    /* ==========================
+       TOUCH
+    ========================== */
+
+    let touchStart=0;
+    let touchScroll=0;
+
+    row.addEventListener("touchstart",(e)=>{
+
+        stopAutoSlide();
+
+        touchStart=e.touches[0].clientX;
+
+        touchScroll=row.scrollLeft;
+
+    });
+
+    row.addEventListener("touchmove",(e)=>{
+
+        const move=e.touches[0].clientX;
+
+        row.scrollLeft=
+
+        touchScroll-(move-touchStart);
+
+    });
+
+    row.addEventListener("touchend",()=>{
+
+        resumeLater();
+
+    });
+
+    /* ==========================
+       WHEEL
+    ========================== */
+
+    row.addEventListener("wheel",(e)=>{
+
+        e.preventDefault();
+
+        stopAutoSlide();
+
+        row.scrollLeft+=e.deltaY;
+
+        resumeLater();
+
+    });
 
 });
 
 /* =====================================================
-   TOUCH SUPPORT
+   BACK TO TOP
 ===================================================== */
 
-movieRows.forEach((row)=>{
+const backTop = document.createElement("button");
 
-let startTouch = 0;
+backTop.id = "backTop";
 
-let startScroll = 0;
+backTop.innerHTML =
+'<i class="fa-solid fa-arrow-up"></i>';
 
-row.addEventListener("touchstart",(e)=>{
+document.body.appendChild(backTop);
 
-startTouch =
-e.touches[0].clientX;
+backTop.addEventListener("click",()=>{
 
-startScroll =
-row.scrollLeft;
+    window.scrollTo({
 
-});
+        top:0,
 
-row.addEventListener("touchmove",(e)=>{
+        behavior:"smooth"
 
-const current =
-e.touches[0].clientX;
-
-const move =
-(current-startTouch)*2;
-
-row.scrollLeft =
-startScroll-move;
+    });
 
 });
+
+window.addEventListener("scroll",()=>{
+
+    if(window.scrollY>600){
+
+        backTop.classList.add("show");
+
+    }else{
+
+        backTop.classList.remove("show");
+
+    }
 
 });
 
 /* =====================================================
-   MOUSE WHEEL
+   RANDOM QUOTES
 ===================================================== */
 
-movieRows.forEach((row)=>{
+const endingText =
+document.querySelector(".ending p");
 
-row.addEventListener("wheel",(e)=>{
+const quotes=[
 
-e.preventDefault();
+"Continue Watching Forever ❤️",
 
-row.scrollLeft += e.deltaY;
+"Our Story Never Ends.",
 
-});
+"Every Day Is A New Episode.",
 
-});
+"The Best Love Story Ever.",
+
+"Only On Netflix Premium."
+
+];
+
+let quoteIndex=0;
+
+if(endingText){
+
+setInterval(()=>{
+
+quoteIndex++;
+
+if(quoteIndex>=quotes.length){
+
+quoteIndex=0;
+
+}
+
+endingText.textContent=
+
+quotes[quoteIndex];
+
+},5000);
+
+}
 
 /* =====================================================
-   MOVIE CARD HOVER
+   CARD CLICK ANIMATION
 ===================================================== */
 
-const movieCards =
-document.querySelectorAll(".movie-card");
-
-movieCards.forEach((card)=>{
-
-card.addEventListener("mouseenter",()=>{
-
-card.style.zIndex="99";
-
-});
-
-card.addEventListener("mouseleave",()=>{
-
-card.style.zIndex="1";
-
-});
-
-});
-
-/* =====================================================
-   CARD CLICK EFFECT
-===================================================== */
-
-movieCards.forEach((card)=>{
+document
+.querySelectorAll(".movie-card")
+.forEach(card=>{
 
 card.addEventListener("click",()=>{
 
@@ -894,22 +1003,19 @@ card.animate(
 
 {
 
-transform:
-"scale(1)"
+transform:"scale(1)"
 
 },
 
 {
 
-transform:
-"scale(.95)"
+transform:"scale(.96)"
 
 },
 
 {
 
-transform:
-"scale(1)"
+transform:"scale(1)"
 
 }
 
@@ -917,7 +1023,7 @@ transform:
 
 {
 
-duration:300
+duration:250
 
 }
 
@@ -928,420 +1034,108 @@ duration:300
 });
 
 /* =====================================================
-   FEATURED BUTTON
+   HERO PARALLAX
 ===================================================== */
 
-const watchBtn =
-document.querySelector(".watch-btn");
+const heroSection =
+document.querySelector(".hero");
 
-if(watchBtn){
+window.addEventListener("scroll",()=>{
 
-watchBtn.addEventListener("click",()=>{
+const value=
+window.scrollY*0.3;
 
-startMusic();
+heroSection.style.backgroundPosition=
 
-watchBtn.innerHTML=
-
-'<i class="fa-solid fa-circle-check"></i> Playing';
-
-setTimeout(()=>{
-
-watchBtn.innerHTML=
-
-'<i class="fa-solid fa-play"></i> Watch Now';
-
-},2500);
-
-});
-
-}
-
-/* =====================================================
-   RANDOM BADGE
-===================================================== */
-
-const badges=[
-
-"TOP 10",
-
-"NEW",
-
-"TRENDING",
-
-"POPULAR",
-
-"NETFLIX",
-
-"❤️ FOR YOU"
-
-];
-
-movieCards.forEach((card)=>{
-
-const badge=
-
-document.createElement("span");
-
-badge.className="top-badge";
-
-badge.textContent=
-
-badges[
-Math.floor(
-Math.random()*badges.length
-)
-];
-
-card.appendChild(badge);
+`center ${value}px`;
 
 });
 
 /* =====================================================
-   RANDOM QUALITY
+   FLOATING GLOW
 ===================================================== */
 
-const qualities=[
+const glow=
+document.querySelector(".floating-gradient");
 
-"HD",
+document.addEventListener("mousemove",(e)=>{
 
-"FULL HD",
+const x=
 
-"4K",
+(window.innerWidth/2-e.clientX)/40;
 
-"HDR",
+const y=
 
-"DOLBY"
+(window.innerHeight/2-e.clientY)/40;
 
-];
+glow.style.transform=
 
-movieCards.forEach((card)=>{
-
-const quality=
-
-document.createElement("span");
-
-quality.className="quality";
-
-quality.textContent=
-
-qualities[
-Math.floor(
-Math.random()*qualities.length
-)
-];
-
-card.appendChild(quality);
+`translate(${x}px,${y}px)`;
 
 });
-
-/* =====================================================
-   CONTINUE WATCHING EFFECT
-===================================================== */
-
-movieCards.forEach((card)=>{
-
-const progress=
-
-document.createElement("div");
-
-progress.style.position="absolute";
-
-progress.style.left="0";
-
-progress.style.bottom="0";
-
-progress.style.height="4px";
-
-progress.style.width=
-
-(Math.random()*100)+"%";
-
-progress.style.background="#E50914";
-
-progress.style.zIndex="5";
-
-card.appendChild(progress);
-
-});
-
-/* =====================================================
-   AUTO SCROLL MOVIE ROW
-===================================================== */
-
-const rows = document.querySelectorAll(".movie-row");
-
-rows.forEach((row) => {
-
-    let autoScroll = setInterval(() => {
-
-        row.scrollLeft += 1.2;
-
-        if (
-            row.scrollLeft >=
-            row.scrollWidth - row.clientWidth
-        ) {
-
-            row.scrollLeft = 0;
-
-        }
-
-    }, 20);
-
-    row.addEventListener("mouseenter", () => {
-
-        clearInterval(autoScroll);
-
-    });
-
-    row.addEventListener("mouseleave", () => {
-
-        autoScroll = setInterval(() => {
-
-            row.scrollLeft += 1.2;
-
-            if (
-                row.scrollLeft >=
-                row.scrollWidth - row.clientWidth
-            ) {
-
-                row.scrollLeft = 0;
-
-            }
-
-        }, 20);
-
-    });
-
-});
-
-/* =====================================================
-   FLOATING PARTICLES
-===================================================== */
-
-const particleContainer = document.createElement("div");
-
-particleContainer.style.position = "fixed";
-particleContainer.style.left = "0";
-particleContainer.style.top = "0";
-particleContainer.style.width = "100%";
-particleContainer.style.height = "100%";
-particleContainer.style.pointerEvents = "none";
-particleContainer.style.zIndex = "-1";
-
-document.body.appendChild(particleContainer);
-
-function createParticle() {
-
-    const particle = document.createElement("span");
-
-    particle.style.position = "absolute";
-    particle.style.width = "4px";
-    particle.style.height = "4px";
-    particle.style.borderRadius = "50%";
-    particle.style.background = "rgba(229,9,20,.7)";
-
-    particle.style.left =
-        Math.random() * window.innerWidth + "px";
-
-    particle.style.top =
-        window.innerHeight + "px";
-
-    particle.style.opacity = Math.random();
-
-    particleContainer.appendChild(particle);
-
-    const duration = 5000 + Math.random() * 3000;
-
-    particle.animate(
-
-        [
-
-            {
-                transform: "translateY(0)",
-                opacity: 1
-            },
-
-            {
-                transform: `translateY(-${window.innerHeight + 150}px)`,
-                opacity: 0
-            }
-
-        ],
-
-        {
-
-            duration: duration,
-            easing: "linear"
-
-        }
-
-    );
-
-    setTimeout(() => {
-
-        particle.remove();
-
-    }, duration);
-
-}
-
-setInterval(createParticle, 250);
-
-/* =====================================================
-   HERO PARALLAX SCALE
-===================================================== */
-
-window.addEventListener("scroll", () => {
-
-    const value = window.scrollY * 0.0004;
-
-    hero.style.transform =
-        `scale(${1 + value})`;
-
-});
-
-/* =====================================================
-   KEYBOARD SHORTCUT
-===================================================== */
-
-document.addEventListener("keydown", (e) => {
-
-    if (e.key === "ArrowRight") {
-
-        rows.forEach((row) => {
-
-            row.scrollLeft += 350;
-
-        });
-
-    }
-
-    if (e.key === "ArrowLeft") {
-
-        rows.forEach((row) => {
-
-            row.scrollLeft -= 350;
-
-        });
-
-    }
-
-});
-
-/* =====================================================
-   BACK TO TOP BUTTON
-===================================================== */
-
-const topButton = document.createElement("button");
-
-topButton.innerHTML =
-'<i class="fa-solid fa-arrow-up"></i>';
-
-topButton.id = "backTop";
-
-document.body.appendChild(topButton);
-
-topButton.style.position = "fixed";
-topButton.style.right = "25px";
-topButton.style.bottom = "25px";
-topButton.style.width = "55px";
-topButton.style.height = "55px";
-topButton.style.borderRadius = "50%";
-topButton.style.border = "none";
-topButton.style.background = "#E50914";
-topButton.style.color = "#fff";
-topButton.style.fontSize = "18px";
-topButton.style.cursor = "pointer";
-topButton.style.display = "none";
-topButton.style.zIndex = "999";
-
-window.addEventListener("scroll", () => {
-
-    if (window.scrollY > 500) {
-
-        topButton.style.display = "block";
-
-    } else {
-
-        topButton.style.display = "none";
-
-    }
-
-});
-
-topButton.addEventListener("click", () => {
-
-    window.scrollTo({
-
-        top: 0,
-        behavior: "smooth"
-
-    });
-
-});
-
-/* =====================================================
-   RANDOM NETFLIX QUOTES
-===================================================== */
-
-const quotes = [
-
-    "Continue Watching ❤️",
-
-    "Our Love Never Ends.",
-
-    "Best Romance Ever.",
-
-    "Only On Netflix Premium.",
-
-    "Episode Baru Setiap Hari."
-
-];
-
-setInterval(() => {
-
-    const random =
-        quotes[
-            Math.floor(Math.random() * quotes.length)
-        ];
-
-    const ending =
-        document.querySelector(".ending p");
-
-    if (ending) {
-
-        ending.textContent = random;
-
-    }
-
-}, 4000);
 
 /* =====================================================
    PAGE VISIBILITY
 ===================================================== */
 
-document.addEventListener("visibilitychange", () => {
+const originalTitle=
+document.title;
 
-    if (document.hidden) {
+document.addEventListener(
 
-        document.title = "Come Back ❤️";
+"visibilitychange",
 
-    } else {
+()=>{
 
-        document.title = "Netflix Premium ❤️";
+if(document.hidden){
 
-    }
+document.title=
+
+"Come Back ❤️";
+
+}else{
+
+document.title=
+
+originalTitle;
+
+}
+
+}
+
+);
+
+/* =====================================================
+   BUTTON EFFECT
+===================================================== */
+
+document
+.querySelectorAll("button")
+.forEach(btn=>{
+
+btn.addEventListener("mouseenter",()=>{
+
+btn.style.transition=".3s";
+
+btn.style.transform=
+
+"translateY(-3px) scale(1.03)";
+
+});
+
+btn.addEventListener("mouseleave",()=>{
+
+btn.style.transform="";
+
+});
 
 });
 
 /* =====================================================
-   FINAL INITIALIZATION
+   FINAL
 ===================================================== */
 
-console.log("====================================");
-
-console.log("Netflix Premium Romantic Edition");
-
-console.log("Website Loaded Successfully ❤️");
-
-console.log("====================================");
+console.log("================================");
+console.log("NETFLIX PREMIUM READY");
+console.log("Made With ❤️");
+console.log("================================");
